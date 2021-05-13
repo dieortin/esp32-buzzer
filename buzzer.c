@@ -41,7 +41,6 @@ struct _buzzer_t {
 };
 
 
-
 // Private function declarations
 double buzzer_get_note_freq(buzzer_note_t note, uint8_t octave);
 
@@ -86,31 +85,31 @@ esp_err_t buzzer_play_test(buzzer_t *buzzer, uint16_t bpm) {
 
     buzzer_melody_t melody;
     buzzer_musical_note_t melody_notes[] = {
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_QUAVER_DOTTED},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_SEMIQUAVER},
-            {BUZZER_NOTE_D, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_F, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_E, 4, BUZZER_NTYPE_MINIM},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_QUAVER_DOTTED},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_SEMIQUAVER},
-            {BUZZER_NOTE_D, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_G, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_F, 4, BUZZER_NTYPE_MINIM},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_QUAVER_DOTTED},
-            {BUZZER_NOTE_C, 4, BUZZER_NTYPE_SEMIQUAVER},
-            {BUZZER_NOTE_C, 5, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_A, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_F, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_E, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_D, 4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_QUAVER_DOTTED},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_SEMIQUAVER},
+            {BUZZER_NOTE_D,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_F,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_E,  4, BUZZER_NTYPE_MINIM},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_QUAVER_DOTTED},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_SEMIQUAVER},
+            {BUZZER_NOTE_D,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_G,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_F,  4, BUZZER_NTYPE_MINIM},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_QUAVER_DOTTED},
+            {BUZZER_NOTE_C,  4, BUZZER_NTYPE_SEMIQUAVER},
+            {BUZZER_NOTE_C,  5, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_A,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_F,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_E,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_D,  4, BUZZER_NTYPE_CROTCHET},
             {BUZZER_NOTE_As, 4, BUZZER_NTYPE_QUAVER_DOTTED},
             {BUZZER_NOTE_As, 4, BUZZER_NTYPE_SEMIQUAVER},
-            {BUZZER_NOTE_A, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_F, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_G, 4, BUZZER_NTYPE_CROTCHET},
-            {BUZZER_NOTE_F, 4, BUZZER_NTYPE_MINIM}
+            {BUZZER_NOTE_A,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_F,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_G,  4, BUZZER_NTYPE_CROTCHET},
+            {BUZZER_NOTE_F,  4, BUZZER_NTYPE_MINIM}
     };
     melody.melody = melody_notes;
     melody.length = sizeof(melody_notes) / sizeof(buzzer_musical_note_t);
@@ -121,7 +120,7 @@ void buzzer_destroy(buzzer_t *buzzer) {
     free(buzzer);
 }
 
-const char* buzzer_get_tag() {
+const char *buzzer_get_tag() {
     return BUZZER_TAG;
 }
 
@@ -132,6 +131,11 @@ esp_err_t buzzer_play(buzzer_t *buzzer) {
     if (ret == ESP_FAIL) return ret;
     buzzer->playing = true;
     return ESP_OK;
+}
+
+bool buzzer_is_playing(buzzer_t *buzzer) {
+    if (!buzzer) return ESP_FAIL;
+    return buzzer->playing;
 }
 
 esp_err_t buzzer_pause(buzzer_t *buzzer) {
@@ -218,16 +222,16 @@ esp_err_t buzzer_play_melody(buzzer_t *buzzer, buzzer_melody_t *melody, uint32_t
     return ESP_OK;
 }
 
-esp_err_t buzzer_set_volume(buzzer_t *buzzer, uint8_t volume) {
-    if (!buzzer) return ESP_FAIL;
-    if (volume > BUZZER_MAX_VOL) volume = BUZZER_MAX_VOL;
-
-    uint32_t duty = ((1u << BUZZER_DUTY_RES_BITS) * volume) / BUZZER_MAX_VOL;
-    esp_err_t ret = ledc_set_duty(BUZZER_SPEED_MODE, buzzer->channel, duty);
-    if (ret == ESP_FAIL) return ret;
-    return ledc_update_duty(BUZZER_SPEED_MODE, buzzer->channel);
-    //return ledc_set_duty_and_update(BUZZER_SPEED_MODE, buzzer->channel, duty, 0);
-}
+//esp_err_t buzzer_set_volume(buzzer_t *buzzer, uint8_t volume) {
+//    if (!buzzer) return ESP_FAIL;
+//    if (volume > BUZZER_MAX_VOL) volume = BUZZER_MAX_VOL;
+//
+//    uint32_t duty = ((1u << BUZZER_DUTY_RES_BITS) * volume) / BUZZER_MAX_VOL;
+//    esp_err_t ret = ledc_set_duty(BUZZER_SPEED_MODE, buzzer->channel, duty);
+//    if (ret == ESP_FAIL) return ret;
+//    return ledc_update_duty(BUZZER_SPEED_MODE, buzzer->channel);
+//    //return ledc_set_duty_and_update(BUZZER_SPEED_MODE, buzzer->channel, duty, 0);
+//}
 
 uint32_t buzzer_note_type_to_ms(buzzer_note_type_t type, uint32_t bpm) {
     uint32_t ms_per_beat = BUZZER_1_MIN_MS / bpm;
